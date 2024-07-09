@@ -13,8 +13,11 @@ import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
-  Logger.root.level = kDebugMode ? Level.FINE : Level.INFO;
+  Logger.root.level = Level.ALL;
+  // kDebugMode ? Level.FINE : Level.INFO;
   Logger.root.onRecord.listen((record) {
+    // print('listenting for logger');
+    print('${record.level.name}: ${record.time}: ${record.message}');
     dev.log(
       record.message,
       time: record.time,
@@ -24,6 +27,7 @@ void main() async {
   });
 
   WidgetsFlutterBinding.ensureInitialized();
+
   // Put game into full screen mode on mobile devices.
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   // Lock the game in portrait mode on mobile devices.

@@ -10,7 +10,9 @@ final router = GoRouter(
   routes: [
     GoRoute(
       path: '/',
-      builder: (context, state) => const MainMenuScreen(key: Key('main menu')),
+      builder: (context, state) => const MainMenuScreen(
+        key: Key('main menu'),
+      ),
       routes: [
         GoRoute(
             path: 'play',

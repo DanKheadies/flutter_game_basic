@@ -21,21 +21,20 @@ class PlaySessionScreen extends StatefulWidget {
 }
 
 class _PlaySessionScreenState extends State<PlaySessionScreen> {
-  static final _log = Logger('PlaySessionScreen');
+  static final log = Logger('PlaySessionScreen');
 
-  static const _celebrationDuration = Duration(milliseconds: 2000);
+  static const celebrationDuration = Duration(milliseconds: 2000);
+  static const preCelebrationDuration = Duration(milliseconds: 500);
 
-  static const _preCelebrationDuration = Duration(milliseconds: 500);
+  bool duringCelebration = false;
 
-  bool _duringCelebration = false;
-
-  late DateTime _startOfPlay;
+  late DateTime startOfPlay;
 
   @override
   void initState() {
     super.initState();
 
-    _startOfPlay = DateTime.now();
+    startOfPlay = DateTime.now();
   }
 
   @override
@@ -50,13 +49,13 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
         ChangeNotifierProvider(
           create: (context) => LevelState(
             goal: widget.level.difficulty,
-            onWin: _playerWon,
+            onWin: playerWon,
           ),
         ),
       ],
       child: IgnorePointer(
         // Ignore all input during the celebration animation.
-        ignoring: _duringCelebration,
+        ignoring: duringCelebration,
         child: Scaffold(
           backgroundColor: palette.backgroundPlaySession,
           // The stack is how you layer widgets on top of each other.
@@ -97,12 +96,32 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
               ),
               // This is the confetti animation that is overlaid on top of the
               // game when the player wins.
-              SizedBox.expand(
+              // SizedBox.expand(
+              //   // child: Visibility(
+              //   //   visible: duringCelebration,
+              //   //   child: IgnorePointer(
+              //   //     child: Confetti(
+              //   //       isStopped: !duringCelebration,
+              //   //     ),
+              //   //   ),
+              //   // ),
+              //   child: Confetti(
+              //     isStopped: false, // !duringCelebration,
+              //   ),
+              // ),
+              Container(
+                // color: Colors.blue,
+                height: MediaQuery.of(context).size.height,
+                width: double.infinity,
+                // child: Confetti(
+                //   // isStopped: false,
+                //   isStopped: !duringCelebration,
+                // ),
                 child: Visibility(
-                  visible: _duringCelebration,
+                  visible: duringCelebration,
                   child: IgnorePointer(
                     child: Confetti(
-                      isStopped: !_duringCelebration,
+                      isStopped: !duringCelebration,
                     ),
                   ),
                 ),
@@ -114,31 +133,34 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
     );
   }
 
-  Future<void> _playerWon() async {
-    _log.info('Level ${widget.level.number} won');
+  Future<void> playerWon() async {
+    print('level won');
+    log.info('Level ${widget.level.number} won');
 
     final score = Score(
       widget.level.number,
       widget.level.difficulty,
-      DateTime.now().difference(_startOfPlay),
+      DateTime.now().difference(startOfPlay),
     );
 
     final playerProgress = context.read<PlayerProgress>();
     playerProgress.setLevelReached(widget.level.number);
 
     // Let the player see the game just after winning for a bit.
-    await Future<void>.delayed(_preCelebrationDuration);
+    await Future<void>.delayed(preCelebrationDuration);
+    print('alpha');
     if (!mounted) return;
+    print('beta');
 
     setState(() {
-      _duringCelebration = true;
+      duringCelebration = true;
     });
 
     final audioController = context.read<AudioController>();
     audioController.playSfx(SfxType.congrats);
 
     /// Give the player some time to see the celebration animation.
-    await Future<void>.delayed(_celebrationDuration);
+    await Future<void>.delayed(celebrationDuration);
     if (!mounted) return;
 
     GoRouter.of(context).go('/play/won', extra: {'score': score});
