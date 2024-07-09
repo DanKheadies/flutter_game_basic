@@ -2,7 +2,6 @@ import 'dart:collection';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 class Confetti extends StatefulWidget {
@@ -32,45 +31,19 @@ class _ConfettiState extends State<Confetti>
 
   @override
   Widget build(BuildContext context) {
-    print('print confetti');
     return CustomPaint(
-      // TODO: painter Sky works, but not ConfettiPainter? why..
-      // painter: Sky(),
       painter: ConfettiPainter(
         colors: widget.colors,
         animation: controller,
       ),
-      // painter: LinePainter(
-      //   progress: controller.value,
-      // ),
-      // painter: PathPainter(),
       willChange: true,
-      // child: Container(
-      //   // color: Colors.black,
-      //   width: double.infinity,
-      //   height: MediaQuery.of(context).size.height,
-      // ),
       child: const SizedBox.expand(),
     );
-    // return CustomPaint(
-    //   painter: ConfettiPainter(
-    //     colors: widget.colors,
-    //     animation: controller,
-    //   ),
-    //   willChange: true,
-    //   child: const SizedBox.expand(),
-    // );
-    // return Container(
-    //   color: Colors.red,
-    //   width: double.infinity,
-    //   height: MediaQuery.of(context).size.height,
-    // );
   }
 
   @override
   void initState() {
     super.initState();
-    print('init confetti');
     controller = AnimationController(
       // We don't really care about the duration, since we're going to
       // use the controller on loop anyway.
@@ -79,16 +52,13 @@ class _ConfettiState extends State<Confetti>
     );
 
     if (!widget.isStopped) {
-      print('repeat the confetti');
       controller.repeat();
-      // controller.forward();
     }
   }
 
   @override
   void didUpdateWidget(covariant Confetti oldWidget) {
     super.didUpdateWidget(oldWidget);
-    print('update confetti');
     if (oldWidget.isStopped && !widget.isStopped) {
       controller.repeat();
     } else if (!oldWidget.isStopped && widget.isStopped) {
@@ -104,7 +74,6 @@ class _ConfettiState extends State<Confetti>
 }
 
 class ConfettiPainter extends CustomPainter {
-  // final int snippingsCount = 200;
   final int snippingsCount = 200;
   final Paint defaultPaint = Paint();
   final UnmodifiableListView<Color> colors;
@@ -122,56 +91,35 @@ class ConfettiPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // print('paint confetti');
-    // Note: ran a LOT (as it should, it's repainting the animation)
     if (conSize == null) {
-      // print('con is null, so generate');
       snippings = List.generate(
         snippingsCount,
         (i) => PaperSnipping(
           frontColor: colors[i % colors.length],
-          // frontColor: Colors.red,
           sizeBounds: size,
         ),
       );
-      // print('(${snippings[5].position.x}, ${snippings[5].position.y})');
-      // print('(${snippings[95].position.x}, ${snippings[95].position.y})');
-      // print('conSize: $conSize');
-      // print('size: $size');
     }
 
-    // Note: this all runs multiple times, i.e. updates via the ani like it should
-    // print('conSize: $conSize');
-    // print('size: $size');
     final didResize = conSize != null && conSize != size;
-    // print('didResize: $didResize');
     final now = DateTime.now();
     final dt = now.difference(lastTime);
 
     for (final snipping in snippings) {
       if (didResize) {
-        // Note: should run is the screen changes orientation or something
-        // if (true) {
-        // print('\"did\" resize');
         snipping.updateBounds(size);
       }
-      // print('update snipping');
-      snipping.update(dt.inMilliseconds / 1000);
 
-      // print('draw snipping');
+      snipping.update(dt.inMilliseconds / 1000);
       snipping.draw(canvas);
     }
 
     conSize = size;
     lastTime = now;
-
-    // LinePainter().paint(canvas, size);
   }
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    // print('repaint confetti');
-    // Note: doesn't run?
     return true;
   }
 }
@@ -210,47 +158,10 @@ class PaperSnipping {
   double rotation = random.nextDouble() * 360 * degToRad;
   double time = random.nextDouble();
 
-  // List<Vector> corners2 = [
-  //   Vector(
-  //     cos((random.nextDouble() * 90 * degToRad) + degToRad * (45 + 0 + 90)),
-  //     sin((random.nextDouble() * 90 * degToRad) + degToRad * (45 + 0 + 90)),
-  //   ),
-  //   Vector(
-  //     cos((random.nextDouble() * 90 * degToRad) + degToRad * (45 + 1 + 90)),
-  //     sin((random.nextDouble() * 90 * degToRad) + degToRad * (45 + 1 + 90)),
-  //   ),
-  //   Vector(
-  //     cos((random.nextDouble() * 90 * degToRad) + degToRad * (45 + 2 + 90)),
-  //     sin((random.nextDouble() * 90 * degToRad) + degToRad * (45 + 2 + 90)),
-  //   ),
-  //   Vector(
-  //     cos((random.nextDouble() * 90 * degToRad) + degToRad * (45 + 3 + 90)),
-  //     sin((random.nextDouble() * 90 * degToRad) + degToRad * (45 + 3 + 90)),
-  //   ),
-  // ];
-  // late List<Vector> corners2 = [
-  //   Vector(
-  //     cos(angle + degToRad * (45 + 0 + 90)),
-  //     sin(angle + degToRad * (45 + 0 + 90)),
-  //   ),
-  //   Vector(
-  //     cos(angle + degToRad * (45 + 1 + 90)),
-  //     sin(angle + degToRad * (45 + 1 + 90)),
-  //   ),
-  //   Vector(
-  //     cos(angle + degToRad * (45 + 2 + 90)),
-  //     sin(angle + degToRad * (45 + 2 + 90)),
-  //   ),
-  //   Vector(
-  //     cos(angle + degToRad * (45 + 3 + 90)),
-  //     sin(angle + degToRad * (45 + 3 + 90)),
-  //   ),
-  // ];
-
-  late List<Vector> corners2 = List.generate(
+  late List<Vector> corners = List.generate(
     4,
     (i) {
-      final vecAngle = angle + degToRad * (45 + i + 90) * rotation;
+      final vecAngle = angle + degToRad * (45 + i + 90);
       return Vector(
         cos(vecAngle),
         sin(vecAngle),
@@ -275,97 +186,32 @@ class PaperSnipping {
     //             )),
     //     true,
     //   );
-    // List<Offset> offsets = List.generate(
-    //   4,
-    //   (i) => Offset(
-    //     position.x + i == 0 || i == 3 ? 0 : 10 + corners[i].x * 1,
-    //     position.y + i == 0 || i == 1 ? 0 : 10 + corners[i].y * 1 * 1,
-    //   ),
-    // );
-    // print(offsets);
-    Path path = Path();
-    // path.addPolygon(
-    //   [
-    //     // Offset.zero,
-    //     Offset(
-    //       position.x + corners[0].x * size,
-    //       position.y + corners[0].y * size * cosA,
-    //     ),
-    //     Offset(bounds.width / 4, bounds.height / 4),
-    //     Offset(bounds.width / 2, bounds.height),
-    //   ],
-    //   true,
-    // );
 
-    // Update: THIS WORKS
-    // path.addPolygon(
-    //   [
-    //     // Offset.zero,
-    //     Offset(
-    //       position.x,
-    //       position.y,
-    //     ),
-    //     Offset(
-    //       position.x + 10,
-    //       position.y,
-    //     ),
-    //     Offset(
-    //       position.x + 10,
-    //       position.y + 10,
-    //     ),
-    //     Offset(
-    //       position.x,
-    //       position.y + 10,
-    //     ),
-    //   ],
-    //   true,
-    // );
-    // path.addPolygon(
-    //   [
-    //     Offset(
-    //       position.x + corners2[0].x * size,
-    //       position.y + corners2[0].y * size * cosA,
-    //     ),
-    //     Offset(
-    //       position.x + corners2[1].x * size + 0,
-    //       position.y + corners2[1].y * size * cosA,
-    //     ),
-    //     Offset(
-    //       position.x + corners2[2].x * size + 0,
-    //       position.y + 0 + corners2[2].y * size * cosA,
-    //     ),
-    //     Offset(
-    //       position.x + corners2[3].x * size,
-    //       position.y + 0 + corners2[3].y * size * cosA,
-    //     ),
-    //   ],
-    //   true,
-    // );
-    path.addPolygon(
-      [
-        Offset(
-          position.x + corners2[0].x * size,
-          position.y + corners2[0].y * size * cosA,
-        ),
-        Offset(
-          position.x + (corners2[1].x + sSize) * size,
-          position.y + corners2[1].y * size * cosA,
-        ),
-        Offset(
-          position.x + (corners2[2].x + sSize) * size,
-          position.y + (corners2[2].y + sSize) * size * cosA,
-        ),
-        Offset(
-          position.x + corners2[3].x * size,
-          position.y + (corners2[3].y + sSize) * size * cosA,
-        ),
-      ],
-      true,
-    );
-    // path.addPolygon(
-    //   offsets,
-    //   true,
-    // );
+    // Note: using List.generate() wouldn't make the confetti visible / sized right
+    // Had to add a "manual" list
+    final path = Path()
+      ..addPolygon(
+        [
+          Offset(
+            position.x + corners[0].x * size,
+            position.y + corners[0].y * size * cosA,
+          ),
+          Offset(
+            position.x + (corners[1].x + sSize) * size,
+            position.y + corners[1].y * size * cosA,
+          ),
+          Offset(
+            position.x + (corners[2].x + sSize) * size,
+            position.y + (corners[2].y + sSize) * size * cosA,
+          ),
+          Offset(
+            position.x + corners[3].x * size,
+            position.y + (corners[3].y + sSize) * size * cosA,
+          ),
+        ],
+        true,
+      );
+
     canvas.drawPath(path, paint);
   }
 
