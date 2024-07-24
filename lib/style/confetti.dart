@@ -78,7 +78,7 @@ class ConfettiPainter extends CustomPainter {
   final Paint defaultPaint = Paint();
   final UnmodifiableListView<Color> colors;
 
-  late final List<PaperSnipping> snippings;
+  late final List<ConfettiSquare> snippings;
 
   DateTime lastTime = DateTime.now();
   Size? conSize;
@@ -94,9 +94,9 @@ class ConfettiPainter extends CustomPainter {
     if (conSize == null) {
       snippings = List.generate(
         snippingsCount,
-        (i) => PaperSnipping(
+        (i) => ConfettiSquare(
           frontColor: colors[i % colors.length],
-          sizeBounds: size,
+          bounds: size,
         ),
       );
     }
@@ -124,50 +124,46 @@ class ConfettiPainter extends CustomPainter {
   }
 }
 
-class PaperSnipping {
+class ConfettiSquare {
   final Color frontColor;
-  final Size sizeBounds;
-  Size bounds;
+  Size paperBounds;
 
-  PaperSnipping({
+  ConfettiSquare({
     required this.frontColor,
-    required this.sizeBounds,
-  }) : bounds = sizeBounds;
+    required Size bounds,
+  }) : paperBounds = bounds;
 
-  static final Random random = Random();
   static const degToRad = pi / 180;
-  static const backSideBlend = Color(0x70eeeeee);
-
-  late final Color backColor = Color.alphaBlend(backSideBlend, frontColor);
-  late final Vector position = Vector(
-    random.nextDouble() * bounds.width - 25,
-    random.nextDouble() * bounds.height,
-  );
+  static const backSideBlend = Color(0x70EEEEEE);
+  static final Random random = Random();
 
   final double angle = random.nextDouble() * 360 * degToRad;
-  final double oscillationSpeed = 0.5 * random.nextDouble() * 1.5;
+  final double oscillationSpeed = 0.5 + random.nextDouble() * 1.5;
   final double rotationSpeed = 800 + random.nextDouble() * 600;
-  final double size = 1.0; // OG modifier
+  final double size = 7.0;
   final double xSpeed = 40;
   final double ySpeed = 50 + random.nextDouble() * 60;
-  final int sSize = 5; // Added to offsets to give it size; 3-10 is ideal
-
-  final paint = Paint()..style = PaintingStyle.fill;
 
   double cosA = 1.0;
   double rotation = random.nextDouble() * 360 * degToRad;
   double time = random.nextDouble();
 
-  late List<Vector> corners = List.generate(
-    4,
-    (i) {
-      final vecAngle = angle + degToRad * (45 + i + 90);
-      return Vector(
-        cos(vecAngle),
-        sin(vecAngle),
-      );
-    },
+  late List<Vector> corners = List.generate(4, (i) {
+    final newAngle = angle + degToRad * (45 + i * 90);
+    return Vector(
+      cos(newAngle),
+      sin(newAngle),
+    );
+  });
+
+  late final Color backColor = Color.alphaBlend(backSideBlend, frontColor);
+
+  late final Vector position = Vector(
+    random.nextDouble() * paperBounds.width,
+    random.nextDouble() * paperBounds.height,
   );
+
+  final paint = Paint()..style = PaintingStyle.fill;
 
   void draw(Canvas canvas) {
     if (cosA > 0) {
@@ -176,42 +172,16 @@ class PaperSnipping {
       paint.color = backColor;
     }
 
-    // final path = Path()
-    //   ..addPolygon(
-    //     List.generate(
-    //         4,
-    //         (index) => Offset(
-    //               position.x + corners[index].x * size,
-    //               position.y + corners[index].y * size * cosA,
-    //             )),
-    //     true,
-    //   );
-
-    // Note: using List.generate() wouldn't make the confetti visible / sized right
-    // Had to add a "manual" list
     final path = Path()
       ..addPolygon(
-        [
-          Offset(
-            position.x + corners[0].x * size,
-            position.y + corners[0].y * size * cosA,
-          ),
-          Offset(
-            position.x + (corners[1].x + sSize) * size,
-            position.y + corners[1].y * size * cosA,
-          ),
-          Offset(
-            position.x + (corners[2].x + sSize) * size,
-            position.y + (corners[2].y + sSize) * size * cosA,
-          ),
-          Offset(
-            position.x + corners[3].x * size,
-            position.y + (corners[3].y + sSize) * size * cosA,
-          ),
-        ],
+        List.generate(
+            4,
+            (index) => Offset(
+                  position.x + corners[index].x * size,
+                  position.y + corners[index].y * size * cosA,
+                )),
         true,
       );
-
     canvas.drawPath(path, paint);
   }
 
@@ -221,19 +191,19 @@ class PaperSnipping {
     cosA = cos(degToRad * rotation);
     position.x += cos(time * oscillationSpeed) * xSpeed * dt;
     position.y += ySpeed * dt;
-    if (position.y > bounds.height) {
-      position.x = random.nextDouble() * bounds.width;
+    if (position.y > paperBounds.height) {
+      // Move the snipping back to the top.
+      position.x = random.nextDouble() * paperBounds.width;
       position.y = 0;
     }
   }
 
-  void updateBounds(Size newBounds) {
-    // Update: we don't update the size of the device / orientation, so never runs
-    if (!newBounds.contains(Offset(position.x, position.y))) {
-      position.x = random.nextDouble() * newBounds.width;
-      position.y = random.nextDouble() * newBounds.height;
+  void updateBounds(Size bounds) {
+    if (!bounds.contains(Offset(position.x, position.y))) {
+      position.x = random.nextDouble() * bounds.width;
+      position.y = random.nextDouble() * bounds.height;
     }
-    bounds = newBounds;
+    paperBounds = bounds;
   }
 }
 

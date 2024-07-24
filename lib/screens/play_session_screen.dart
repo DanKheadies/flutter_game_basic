@@ -96,27 +96,9 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
               ),
               // This is the confetti animation that is overlaid on top of the
               // game when the player wins.
-              // SizedBox.expand(
-              //   // child: Visibility(
-              //   //   visible: duringCelebration,
-              //   //   child: IgnorePointer(
-              //   //     child: Confetti(
-              //   //       isStopped: !duringCelebration,
-              //   //     ),
-              //   //   ),
-              //   // ),
-              //   child: Confetti(
-              //     isStopped: false, // !duringCelebration,
-              //   ),
-              // ),
-              Container(
-                // color: Colors.blue,
+              SizedBox(
                 height: MediaQuery.of(context).size.height,
                 width: double.infinity,
-                // child: Confetti(
-                //   // isStopped: false,
-                //   isStopped: !duringCelebration,
-                // ),
                 child: Visibility(
                   visible: duringCelebration,
                   child: IgnorePointer(

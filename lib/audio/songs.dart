@@ -10,7 +10,7 @@ const Set<Song> songs = {
     artist: 'Daco Taco Flame',
   ),
   Song(
-    'Gatsu.wave',
+    'Gatsu.wav',
     'Gatsu',
     artist: 'Daco Taco Flame',
   ),

@@ -15,7 +15,6 @@ class WinGameScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('build win game');
     final palette = context.watch<Palette>();
 
     const gap = SizedBox(height: 10);
