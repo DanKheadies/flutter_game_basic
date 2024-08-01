@@ -1,30 +1,40 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
+// Copyright 2022, the Flutter project authors. Please see the AUTHORS file
+// for details. All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
 
 import 'package:flutter_game_basic/main.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
+  testWidgets('smoke test', (tester) async {
+    // Build our game and trigger a frame.
     await tester.pumpWidget(const MyGame());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // Verify that the 'Play' button is shown.
+    expect(find.text('Play'), findsOneWidget);
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    // Verify that the 'Settings' button is shown.
+    expect(find.text('Settings'), findsOneWidget);
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Go to 'Settings'.
+    await tester.tap(find.text('Settings'));
+    await tester.pumpAndSettle();
+    expect(find.text('Music'), findsOneWidget);
+
+    // Go back to main menu.
+    await tester.tap(find.text('Back'));
+    await tester.pumpAndSettle();
+
+    // Tap 'Play'.
+    await tester.tap(find.text('Play'));
+    await tester.pumpAndSettle();
+    expect(find.text('Select level'), findsOneWidget);
+
+    // Tap level 1.
+    await tester.tap(find.text('Level #1'));
+    await tester.pumpAndSettle();
+
+    // Find the first level's "tutorial" text.
+    expect(find.text('Drag the slider to 5% or above!'), findsOneWidget);
   });
 }
